@@ -31,4 +31,21 @@ class AlunoCrudTest extends TestCase
         $response->assertOk();
         $response->assertSee('Cadastro de Aluno');
     }
+
+    public function test_student_store_validates_custom_messages(): void
+    {
+        $response = $this->from('/alunos/create')->post('/alunos', [
+            'nome' => '',
+            'email' => '',
+            'curso' => '',
+        ]);
+
+        $response->assertRedirect('/alunos/create');
+        $response->assertSessionHasErrors(['nome', 'email', 'curso']);
+        $response->assertSessionHasErrors([
+            'nome' => 'O campo nome é obrigatório.',
+            'email' => 'O campo email é obrigatório.',
+            'curso' => 'O campo curso é obrigatório.',
+        ]);
+    }
 }
