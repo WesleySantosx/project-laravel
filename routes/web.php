@@ -1,30 +1,20 @@
 <?php
 
-use App\Http\Controllers\AlunoController;
-use App\Models\Aluno;
-use App\Models\Professor;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::resource('alunos', AlunoController::class);
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::get('professores/alunos', function () {
-    $professors = Professor::with('alunos')->get();
-
-    return view('professores.alunos', compact('professors'));
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('app', function () {
-    return view('layouts.app');
-});
-
-Route::get('menu', function () {
-    return view('partials.menu');
-});
-
-Route::get('home', function () {
-    return view('home');
-});
+require __DIR__.'/auth.php';
