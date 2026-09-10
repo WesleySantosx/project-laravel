@@ -12,10 +12,15 @@ class Aluno extends Model
 
     protected $table = 'alunos';
 
-    protected $fillable = ['nome', 'email', 'curso', 'professor_id'];
+    protected $fillable = ['nome', 'email', 'curso', 'professor_id', 'user_id'];
 
     public function professor(): BelongsTo
     {
         return $this->belongsTo(Professor::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }

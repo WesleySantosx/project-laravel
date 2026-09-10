@@ -3,7 +3,9 @@
 namespace Tests\Feature;
 
 use App\Models\Aluno;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Gate;
 use Tests\TestCase;
 
 class AlunoCrudTest extends TestCase
@@ -47,5 +49,33 @@ class AlunoCrudTest extends TestCase
             'email' => 'O campo email é obrigatório.',
             'curso' => 'O campo curso é obrigatório.',
         ]);
+    }
+
+    public function test_admin_user_can_access_admin_route(): void
+    {
+        $user = User::factory()->create(['role' => 'admin']);
+
+        $response = $this->actingAs($user)->get('/admin/alunos');
+
+        $response->assertOk();
+    }
+
+    public function test_professor_user_cannot_access_admin_route(): void
+    {
+        $user = User::factory()->create(['role' => 'professor']);
+
+        $response = $this->actingAs($user)->get('/admin/alunos');
+
+        $response->assertForbidden();
+    }
+
+    public function test_admin_can_delete_aluno_and_professor_cannot(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $professor = User::factory()->create(['role' => 'professor']);
+        $aluno = Aluno::factory()->create();
+
+        $this->assertTrue(Gate::forUser($admin)->allows('delete', $aluno));
+        $this->assertFalse(Gate::forUser($professor)->allows('delete', $aluno));
     }
 }
