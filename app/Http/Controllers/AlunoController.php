@@ -2,37 +2,72 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Aluno;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class AlunoController extends Controller
 {
-    public function index()
+    public function index(): View
     {
-        return "Listando todos os alunos";
+        $alunos = Aluno::latest()->get();
+
+        return view('alunos.index', compact('alunos'));
     }
-    public function create()
+
+    public function create(): View
     {
-        return "Formulário de cadastro de aluno";
+        return view('alunos.create');
     }
-    public function store(Request $request)
+
+    public function store(Request $request): RedirectResponse
     {
-        return "Salvando novo aluno";
+        $validated = $request->validate([
+            'nome' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'unique:alunos,email'],
+            'curso' => ['required', 'string', 'max:255'],
+        ]);
+
+        Aluno::create($validated);
+
+        return redirect()->route('alunos.index')->with('success', 'Aluno cadastrado com sucesso!');
     }
-    public function show($id)
+
+    public function show(string $id): View
     {
-        return "Exibindo detalhes do aluno com ID: {$id}";
+        $aluno = Aluno::findOrFail($id);
+
+        return view('alunos.show', compact('aluno'));
     }
-    public function edit($id)
+
+    public function edit(string $id): View
     {
-        return "Formulário de edição do aluno com ID: {$id}";
+        $aluno = Aluno::findOrFail($id);
+
+        return view('alunos.edit', compact('aluno'));
     }
-    public function update(Request $request, $id)
+
+    public function update(Request $request, string $id): RedirectResponse
     {
-        return "Atualizando aluno com ID: {$id}";
+        $aluno = Aluno::findOrFail($id);
+
+        $validated = $request->validate([
+            'nome' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'unique:alunos,email,' . $aluno->id],
+            'curso' => ['required', 'string', 'max:255'],
+        ]);
+
+        $aluno->update($validated);
+
+        return redirect()->route('alunos.index')->with('success', 'Aluno atualizado com sucesso!');
     }
-    public function destroy($id)
+
+    public function destroy(string $id): RedirectResponse
     {
-        return "Excluindo aluno com ID: {$id}";
+        $aluno = Aluno::findOrFail($id);
+        $aluno->delete();
+
+        return redirect()->route('alunos.index')->with('success', 'Aluno removido com sucesso!');
     }
-    
 }
