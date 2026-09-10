@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AlunoController;
+use App\Models\Aluno;
+use App\Models\Professor;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -8,6 +10,12 @@ Route::get('/', function () {
 });
 
 Route::resource('alunos', AlunoController::class);
+
+Route::get('professores/alunos', function () {
+    $professors = Professor::with('alunos')->get();
+
+    return view('professores.alunos', compact('professors'));
+});
 
 Route::get('app', function () {
     return view('layouts.app');
